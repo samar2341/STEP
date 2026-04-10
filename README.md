@@ -213,7 +213,7 @@ STEP is a powerful prototype that demonstrates how keyboard input can be enhance
 
 ## 👨‍💻 Author
 
-Samar Ansari
+Samar 
 
 ---
 
