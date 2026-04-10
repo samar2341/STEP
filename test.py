@@ -2,9 +2,9 @@ from pynput import keyboard
 
 def on_press(key):
     try:
-        print("You pressed:", key.char)
+        print("\nYou pressed:", key.char, "\n")
     except AttributeError:
-        print("Special key pressed:", key)
+        print("\n\Special key pressed:", key, "\n")
 
 with keyboard.Listener(on_press=on_press) as listener:
     listener.join()
