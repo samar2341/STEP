@@ -1,10 +1,10 @@
 from pynput import kb #alias kb
 
-#dictionary key pair mapping 
+#dictionary of key pair mapping 
 c_keyPair = {
     ">pr": "printf();",
     ">if": "if(){};",
-    ">for": "for(;;;){}",
+    ">for": "for(;;){}",
     ">w": "while(){};",
     ">sw": "switch(){};",
     ">case": "case : break;",
@@ -27,9 +27,9 @@ c_keyPair = {
 py_keyPair = {
     ">pr": "print()",
     ">if": "if :",
-    ">for": "for in :",
+    ">for": "for i in range():",
     ">w": "while :",
-    ">def": "def () :",
+    ">def": "def function_name():",
     ">class": "class :",
     ">try": "try: except:",
     ">with": "with as :",
@@ -69,6 +69,18 @@ cpp_keyPair = {
     ">continue": "continue;",
 }
 
+
+#language mapping 
+languageMapping = {
+    "c": c_keyPair,
+    "python": py_keyPair,
+    "cpp": cpp_keyPair,
+}
+
+#current language key pair mapping
+language = "c" #default language is c
+currentKeyPair = languageMapping[language] #current key pair mapping based on the language selected
+
 #state variable to determine which language is being used
 state = "c" #default state is c
 
@@ -76,4 +88,17 @@ state = "c" #default state is c
 bufferKey = "" #buffer to store the keys pressed
 activeKey = True #flag to determine if the key pair is active
 injectingKey = False #flag to determine if the key pair is being injected
+
+
+#function to get the current key pair mapping based on the language selected
+def getCurrentKeyPair():
+    return languageMapping[language]
+
+
+def isDelimeter(key):
+    #check if the key is a delimiter
+    delimiters = [' ', '\n', '\t', '(', ')', '{', '}', '[', ']', ';']
+    return key in (kb.Key.space, kb.Key.enter, kb.Key.tab) or key.char in delimiters
+
+
 
