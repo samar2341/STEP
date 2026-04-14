@@ -102,3 +102,29 @@ def isDelimeter(key):
 
 
 
+#clear buffer key 
+def clearBufferKey():
+    global bufferKey
+    bufferKey = ""
+
+def removeLastCharacter():
+    global bufferKey
+    bufferKey = bufferKey[:-1]
+
+#buffer update function to update the buffer key based on the key pressed
+def updateBufferKey(key):
+    global bufferKey
+
+    if not bufferKey:
+        if char == ">":
+            bufferKey = ">"
+        return
+    
+    if char.isalpha() or char.isdigit() or char in ['>', '_']:
+        bufferKey += char
+    else:
+        clearBufferKey()
+
+    if isDelimeter(key):
+        clearBufferKey()
+
