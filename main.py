@@ -128,3 +128,28 @@ def updateBufferKey(key):
     if isDelimeter(key):
         clearBufferKey()
 
+def pressBackspace(times):
+    global injectingKey
+    injectingKey = True
+
+    #try
+    try:
+        for _ in range(times):
+            kb.Controller().press(kb.Key.backspace)
+            kb.Controller().release(kb.Key.backspace)
+    except Exception as e:
+        print(f"Error pressing backspace: {e}")
+    finally:
+        injectingKey = False
+
+
+def typeText(text):
+    global injectingKey
+    injectingKey = True
+    try:
+        controller.type(text)
+    except Exception as e:
+        print(f"Error typing text: {e}")
+    finally:
+        injectingKey = False
+        
