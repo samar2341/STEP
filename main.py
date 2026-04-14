@@ -13,6 +13,14 @@ c_keyPair = {
     ">elif": "else if(){};",
     ">main": "int main(){};",
     ">inc": "#include < >",
+    ">stru": "struct {} ;",
+    ">typedef": "typedef struct {} ;",
+    ">union": "union {} ;",
+    ">enum": "enum {} ;",
+    ">fn": "void () {}",
+    ">return": "return ;",
+    ">break": "break;",
+    ">continue": "continue;",
 }
 
 #python key pair mapping
@@ -23,6 +31,17 @@ py_keyPair = {
     ">w": "while :",
     ">def": "def () :",
     ">class": "class :",
+    ">try": "try: except:",
+    ">with": "with as :",
+    ">import": "import",
+    ">from": "from import",
+    ">lambda": "lambda :",
+    ">return": "return",
+    ">pass": "pass",
+    ">break": "break",
+    ">continue": "continue",
+    ">else": "else:",
+    ">elif": "elif :",
 }
 
 #cpp key pair mapping
@@ -39,6 +58,15 @@ cpp_keyPair = {
     ">main": "int main(){};",
     ">inc": "#include < >",
     ">class": "class {};",
+    ">stru": "struct {} ;",
+    ">try": "try {} catch() {}",
+    ">template": "template<> class {} ;",
+    ">namespace": "namespace {} ;",
+    ">using": "using namespace ;",
+    ">fn": "void () {}",
+    ">return": "return ;",
+    ">break": "break;",
+    ">continue": "continue;",
 }
 
 #state variable to determine which language is being used
