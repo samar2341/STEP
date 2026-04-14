@@ -184,3 +184,42 @@ def toggle_step():
     is_active = not is_active
     clear_buffer()
     print("STEP active:", is_active)
+
+
+
+#main function onPress key listener
+def onPress(key):
+    global isInjecting, isActive
+
+    if isInjecting:
+        return
+
+    if key == kb.Key.f8:
+        toggle_step()
+        return
+
+    if not isActive:
+        return
+
+    if key == kb.Key.backspace:
+        remove_last_char()
+        print("BUFFER:", repr(bufferKey))
+        return
+
+    if isDelimeter(key):
+        print("FINAL TOKEN:", repr(bufferKey))
+        expandShortcut(key)
+        return
+
+    try:
+        char = key.char
+    except AttributeError:
+        char = None
+
+    if char is not None:
+        updateBufferKey(key)
+        if bufferKey:
+            print("BUFFER:", repr(bufferKey))
+
+
+
