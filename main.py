@@ -140,11 +140,11 @@ def pressBackspace(times):
         for _ in range(times):
             controller.press(kb.Key.backspace)
             controller.release(kb.Key.backspace)
+        time.sleep(0.05)
     except Exception as e:
         print(f"Error pressing backspace: {e}")
     finally:
         injectingKey = False
-
 
 def typeText(text):
     global injectingKey
