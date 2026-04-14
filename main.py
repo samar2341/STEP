@@ -1,4 +1,8 @@
-from pynput import kb #alias kb
+from pynput import keyboard as kb
+import time
+
+#controller for simulating key presses
+controller = kb.Controller()
 
 #dictionary of key pair mapping 
 c_keyPair = {
@@ -79,7 +83,6 @@ languageMapping = {
 
 #current language key pair mapping
 language = "c" #default language is c
-currentKeyPair = languageMapping[language] #current key pair mapping based on the language selected
 
 #state variable to determine which language is being used
 state = "c" #default state is c
@@ -96,11 +99,14 @@ def getCurrentKeyPair():
 
 
 def isDelimeter(key):
-    #check if the key is a delimiter
+    try:
+        char = key.char
+    except AttributeError:
+        char = None
+
     delimiters = [' ', '\n', '\t', '(', ')', '{', '}', '[', ']', ';']
-    return key in (kb.Key.space, kb.Key.enter, kb.Key.tab) or key.char in delimiters
 
-
+    return key in (kb.Key.space, kb.Key.enter, kb.Key.tab) or (char in delimiters if char else False)
 
 #clear buffer key 
 def clearBufferKey():
@@ -113,31 +119,27 @@ def removeLastCharacter():
 
 
 #buffer update function to update the buffer key based on the key pressed
-def updateBufferKey(key):
+def updateBufferKey(char):
     global bufferKey
 
     if not bufferKey:
         if char == ">":
             bufferKey = ">"
         return
-    
-    if char.isalpha() or char.isdigit() or char in ['>', '_']:
+
+    if char.isalnum() or char in ["_", ">", "."]:
         bufferKey += char
     else:
-        clearBufferKey()
-
-    if isDelimeter(key):
         clearBufferKey()
 
 def pressBackspace(times):
     global injectingKey
     injectingKey = True
 
-    #try
     try:
         for _ in range(times):
-            kb.Controller().press(kb.Key.backspace)
-            kb.Controller().release(kb.Key.backspace)
+            controller.press(kb.Key.backspace)
+            controller.release(kb.Key.backspace)
     except Exception as e:
         print(f"Error pressing backspace: {e}")
     finally:
@@ -147,8 +149,10 @@ def pressBackspace(times):
 def typeText(text):
     global injectingKey
     injectingKey = True
+
     try:
         controller.type(text)
+        time.sleep(0.05)
     except Exception as e:
         print(f"Error typing text: {e}")
     finally:
@@ -179,30 +183,30 @@ def expandShortcut(delimiter_key):
 
 
 
-def toggle_step():
-    global is_active
-    is_active = not is_active
-    clear_buffer()
-    print("STEP active:", is_active)
+def toggleStep():
+    global activeKey
+    activeKey = not activeKey
+    clearBufferKey()
+    print("STEP active:", activeKey)
 
 
 
 #main function onPress key listener
 def onPress(key):
-    global isInjecting, isActive
+    global injectingKey, activeKey
 
-    if isInjecting:
+    if injectingKey:
         return
 
     if key == kb.Key.f8:
-        toggle_step()
+        toggleStep()
         return
 
-    if not isActive:
+    if not activeKey:
         return
 
     if key == kb.Key.backspace:
-        remove_last_char()
+        removeLastCharacter()
         print("BUFFER:", repr(bufferKey))
         return
 
@@ -217,9 +221,26 @@ def onPress(key):
         char = None
 
     if char is not None:
-        updateBufferKey(key)
+        updateBufferKey(char)
         if bufferKey:
             print("BUFFER:", repr(bufferKey))
+
+
+
+
+#main function
+def main():
+    print("Starting STEP...")
+    print("Language:", language)
+    print("Press F8 to toggle ON/OFF")
+    print("Try: >pr then space")
+
+    with kb.Listener(on_press = onPress) as listener:
+        listener.join()
+
+
+if __name__ == "__main__":
+    main()
 
 
 
