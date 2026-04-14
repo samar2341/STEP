@@ -111,6 +111,7 @@ def removeLastCharacter():
     global bufferKey
     bufferKey = bufferKey[:-1]
 
+
 #buffer update function to update the buffer key based on the key pressed
 def updateBufferKey(key):
     global bufferKey
@@ -155,51 +156,31 @@ def typeText(text):
 
 
 
-def expandShortcut(delimeterKey):
+def expandShortcut(delimiter_key):
     currentKeyPair = getCurrentKeyPair()
     if bufferKey in currentKeyPair:
         expansion = currentKeyPair[bufferKey]
+
         pressBackspace(len(bufferKey))
         typeText(expansion)
-    
 
-    if delimeterKey:
-        pressBackspace(1)
-    elif delimeterKey == kb.Key.space:
-        typeText(" ")
-    elif delimeterKey == kb.Key.enter:
-        controller.press(kb.Key.enter)
-        controller.release(kb.Key.enter)
-    elif delimeterKey == kb.Key.tab:
-        controller.press(kb.Key.tab)
-        controller.release(kb.Key.tab)
+        if delimiter_key == kb.Key.space:
+            typeText(" ")
+        elif delimiter_key == kb.Key.enter:
+            controller.press(kb.Key.enter)
+            controller.release(kb.Key.enter)
+        elif delimiter_key == kb.Key.tab:
+            controller.press(kb.Key.tab)
+            controller.release(kb.Key.tab)
 
-    elif delimeterKey == kb.Key.backspace:
-        controller.press(kb.Key.backspace)
-        controller.release(kb.Key.backspace)
-    elif delimeterKey == kb.Key.esc:
-        controller.press(kb.Key.esc)
-        controller.release(kb.Key.esc)
-    elif delimeterKey == kb.Key.shift:
-        controller.press(kb.Key.shift)
-        controller.release(kb.Key.shift)
-    elif delimeterKey == kb.Key.ctrl:
-        controller.press(kb.Key.ctrl)
-        controller.release(kb.Key.ctrl)
-    elif delimeterKey == kb.Key.alt:
-        controller.press(kb.Key.alt)
-        controller.release(kb.Key.alt)
-    elif delimeterKey == kb.Key.cmd:
-        controller.press(kb.Key.cmd)
-        controller.release(kb.Key.cmd)
-    elif delimeterKey == kb.Key.caps_lock:
-        controller.press(kb.Key.caps_lock)
-        controller.release(kb.Key.caps_lock)
-    elif delimeterKey == kb.Key.num_lock:
-        controller.press(kb.Key.num_lock)
-        controller.release(kb.Key.num_lock)
-
-    printf(f"Buffer Key: {bufferKey}, Delimiter Key: {delimeterKey}")
+        print(f"Expanded: {bufferKey} -> {expansion}")
 
     clearBufferKey()
 
+
+
+def toggle_step():
+    global is_active
+    is_active = not is_active
+    clear_buffer()
+    print("STEP active:", is_active)
