@@ -1,5 +1,8 @@
 from pynput import keyboard as kb
 import time
+from spellchecker import SpellChecker
+
+spell = SpellChecker(distance=1)
 
 #controller for simulating key presses
 controller = kb.Controller()
@@ -92,9 +95,25 @@ def setLanguage(lang):
     clearBufferKey()
     print(f"[STEP] Language switched to: {language}")
 
-#current language key pair mapping
-language = "c" #default language is c
 
+#mode of use
+mode = "writing"
+mode = "coding"
+
+def setMode(new_mode):
+    global mode
+
+    valid_modes = {"writing", "coding"}
+
+    if new_mode not in valid_modes:
+        print(f"[ERROR] Invalid mode: {new_mode}")
+        return
+
+    mode = new_mode
+    clearBufferKey()
+    print(f"[STEP] Mode switched to: {mode}")
+
+    
 #state variable to determine which language is being used
 state = "c" #default state is c
 
@@ -295,6 +314,17 @@ def findExactShortcut():
     currentKeyPair = getCurrentKeyPair()
     return currentKeyPair.get(bufferKey)
 
+
+def processCompletedToken(delimiter_key):
+    if mode == "writing":
+        autoCorrectCurrentWord()
+        retypeDelimiter(delimiter_key)
+
+    elif mode == "coding":
+        if bufferKey.startswith(">"):
+            expandShortcut(delimiter_key)
+        else:
+            retypeDelimiter(delimiter_key)
 
 #main function
 def main():
