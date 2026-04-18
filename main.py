@@ -81,6 +81,17 @@ languageMapping = {
     "cpp": cpp_keyPair,
 }
 
+def setLanguage(lang):
+    global language
+
+    if lang not in languageMapping:
+        print(f"[ERROR] Unknown language: {lang}")
+        return
+
+    language = lang
+    clearBufferKey()
+    print(f"[STEP] Language switched to: {language}")
+
 #current language key pair mapping
 language = "c" #default language is c
 
@@ -107,7 +118,7 @@ def isDelimeter(key):
     delimiters = ['(', ')', '{', '}', '[', ']']
 
     return key in (kb.Key.space, kb.Key.enter, kb.Key.tab) or (char in delimiters if char else False)
-    
+
 #clear buffer key 
 def clearBufferKey():
     global bufferKey
