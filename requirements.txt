@@ -1,4 +1,5 @@
 evdev==1.9.3
 pynput==1.8.1
+pyspellchecker==0.9.0
 python-xlib==0.33
 six==1.17.0
