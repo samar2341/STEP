@@ -116,6 +116,9 @@ def setMode(new_mode):
     
 #state variable to determine which language is being used
 state = "c" #default state is c
+mode = "writing"
+autocorrect_enabled = True
+gui_open = False
 
 #global stating
 bufferKey = "" #buffer to store the keys pressed
@@ -325,6 +328,14 @@ def processCompletedToken(delimiter_key):
             expandShortcut(delimiter_key)
         else:
             retypeDelimiter(delimiter_key)
+
+
+
+#autocorrect function to autocorrect the current word based on the spell checker
+def toggleAutocorrect():
+    global autocorrect_enabled
+    autocorrect_enabled = not autocorrect_enabled
+    print(f"[STEP] Autocorrect: {autocorrect_enabled}")
 
 #main function
 def main():
