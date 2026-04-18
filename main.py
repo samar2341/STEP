@@ -104,10 +104,10 @@ def isDelimeter(key):
     except AttributeError:
         char = None
 
-    delimiters = [' ', '\n', '\t', '(', ')', '{', '}', '[', ']', ';']
+    delimiters = ['(', ')', '{', '}', '[', ']']
 
     return key in (kb.Key.space, kb.Key.enter, kb.Key.tab) or (char in delimiters if char else False)
-
+    
 #clear buffer key 
 def clearBufferKey():
     global bufferKey
@@ -161,26 +161,41 @@ def typeText(text):
 
 
 def expandShortcut(delimiter_key):
+    global injectingKey
+
     currentKeyPair = getCurrentKeyPair()
+
     if bufferKey in currentKeyPair:
         expansion = currentKeyPair[bufferKey]
 
-        pressBackspace(len(bufferKey))
-        typeText(expansion)
+        injectingKey = True
 
-        if delimiter_key == kb.Key.space:
-            typeText(" ")
-        elif delimiter_key == kb.Key.enter:
-            controller.press(kb.Key.enter)
-            controller.release(kb.Key.enter)
-        elif delimiter_key == kb.Key.tab:
-            controller.press(kb.Key.tab)
-            controller.release(kb.Key.tab)
+        try:
+        
+            for _ in range(len(bufferKey)):
+                controller.press(kb.Key.backspace)
+                controller.release(kb.Key.backspace)
 
-        print(f"Expanded: {bufferKey} -> {expansion}")
+       
+            controller.type(expansion)
+
+            # re-type delimiter properly
+            if delimiter_key == kb.Key.space:
+                controller.press(kb.Key.space)
+                controller.release(kb.Key.space)
+            elif delimiter_key == kb.Key.enter:
+                controller.press(kb.Key.enter)
+                controller.release(kb.Key.enter)
+            elif delimiter_key == kb.Key.tab:
+                controller.press(kb.Key.tab)
+                controller.release(kb.Key.tab)
+
+            print(f"Expanded: {bufferKey} -> {expansion}")
+
+        finally:
+            injectingKey = False 
 
     clearBufferKey()
-
 
 
 def toggleStep():
