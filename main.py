@@ -221,6 +221,28 @@ def toggleStep():
     clearBufferKey()
     print("STEP active:", activeKey)
 
+def expandInstantly():
+    global injectingKey
+
+    expansion = findExactShortcut()
+    if not expansion:
+        return
+
+    typed = bufferKey
+
+    injectingKey = True
+    try:
+        for _ in range(len(typed)):
+            controller.press(kb.Key.backspace)
+            controller.release(kb.Key.backspace)
+
+        controller.type(expansion)
+        print(f"Expanded instantly: {typed} -> {expansion}")
+
+    finally:
+        injectingKey = False
+        clearBufferKey()
+
 
 
 #main function onPress key listener
@@ -267,13 +289,11 @@ def onPress(key):
         updateBufferKey(char)
         if bufferKey:
             print("BUFFER:", repr(bufferKey))
+            expandInstantly()
 
 def findExactShortcut():
     currentKeyPair = getCurrentKeyPair()
     return currentKeyPair.get(bufferKey)
-
-
-
 
 
 #main function
