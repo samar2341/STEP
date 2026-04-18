@@ -227,6 +227,17 @@ def onPress(key):
     if key == kb.Key.f8:
         toggleStep()
         return
+    if key == kb.Key.f6:
+        setLanguage("c")
+        return
+
+    if key == kb.Key.f7:
+        setLanguage("python")
+        return
+
+    if key == kb.Key.f9:
+        setLanguage("cpp")
+        return
 
     if not activeKey:
         return
