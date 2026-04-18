@@ -176,6 +176,12 @@ def expandShortcut(delimiter_key):
 
     currentKeyPair = getCurrentKeyPair()
 
+    expansion = findExactShortcut()
+
+    if not expansion:
+        clearBufferKey()
+        return
+
     if bufferKey in currentKeyPair:
         expansion = currentKeyPair[bufferKey]
 
@@ -261,6 +267,11 @@ def onPress(key):
         updateBufferKey(char)
         if bufferKey:
             print("BUFFER:", repr(bufferKey))
+
+def findExactShortcut():
+    currentKeyPair = getCurrentKeyPair()
+    return currentKeyPair.get(bufferKey)
+
 
 
 
