@@ -21,13 +21,13 @@ c_keyPair = {
     ">do": "do{} while(|);",
     ">else": "else{}",
     ">elif": "else if(|){}",
-    ">main": "int main(|){}",
+    ">main": "int main(){|}",
     ">inc": "#include <|>",
     ">stru": "struct {|};",
     ">typedef": "typedef struct {|};",
     ">union": "union {|};",
     ">enum": "enum {|};",
-    ">fn": "void (|) {}",
+    ">fn": "void |() {}",
     ">return": "return |;",
     ">break": "break;",
     ">continue": "continue;",
@@ -445,19 +445,19 @@ def autoCorrectCurrentWord():
     if len(bufferKey) <= 2:
         return
 
-    # get all candidates
     candidates = spell.candidates(bufferKey)
 
     if not candidates:
         return
 
-    # pick closest word manually
     def similarity(a, b):
         return sum(1 for x, y in zip(a, b) if x == y)
+    def score(w):
+        length_penalty = abs(len(w) - len(bufferKey))
+        match_score = sum(1 for a, b in zip(w, bufferKey) if a == b)
+        return match_score - length_penalty
 
     best_match = max(candidates, key=lambda w: similarity(bufferKey, w))
-
-    # avoid bad corrections
     if best_match == bufferKey:
         return
 
@@ -466,7 +466,7 @@ def autoCorrectCurrentWord():
 
     injectingKey = True
     try:
-        # Select the entire word backward
+
         controller.press(kb.Key.ctrl)
         controller.press(kb.Key.shift)
         controller.press(kb.Key.left)
@@ -483,14 +483,19 @@ def autoCorrectCurrentWord():
 
 #main function
 def main():
-    print("Starting STEP...")
-    print("Language:", language)
-    print("Press F8 to toggle ON/OFF")
-    print("Try: >pr then space")
+    print("\n===== STEP =====")
+    print(f"Language    : {language}")
+    print(f"Mode        : {mode}")
+    print(f"Autocorrect : {'ON' if autocorrect_enabled else 'OFF'}")
+    print("Shortcuts:")
+    print("Ctrl + Alt + F10 : Cycle mode")
+    print("\nExample:")
+    print("  Coding mode -> type >pr")
+    print("  Writing mode -> type a word and press space")
+    print("================\n")
 
-    with kb.Listener(on_press = onPress, on_release = onRelease) as listener:
+    with kb.Listener(on_press=onPress, on_release=onRelease) as listener:
         listener.join()
-
 
 if __name__ == "__main__":
     main()
