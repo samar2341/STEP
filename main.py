@@ -7,71 +7,74 @@ spell = SpellChecker(distance=1)
 #controller for simulating key presses
 controller = kb.Controller()
 
+#state variable to determine which language is being used
+language = "c" #default language
+
 #dictionary of key pair mapping 
 c_keyPair = {
-    ">pr": "printf();",
-    ">if": "if(){};",
-    ">for": "for(;;){}",
-    ">w": "while(){};",
-    ">sw": "switch(){};",
-    ">case": "case : break;",
-    ">do": "do{} while();",
-    ">else": "else{};",
-    ">elif": "else if(){};",
-    ">main": "int main(){};",
-    ">inc": "#include < >",
-    ">stru": "struct {} ;",
-    ">typedef": "typedef struct {} ;",
-    ">union": "union {} ;",
-    ">enum": "enum {} ;",
-    ">fn": "void () {}",
-    ">return": "return ;",
+    ">pr": "printf(\"|\");",
+    ">if": "if(|){}",
+    ">for": "for(|;;){}",
+    ">w": "while(|){}",
+    ">sw": "switch(|){}",
+    ">case": "case |: break;",
+    ">do": "do{} while(|);",
+    ">else": "else{}",
+    ">elif": "else if(|){}",
+    ">main": "int main(|){}",
+    ">inc": "#include <|>",
+    ">stru": "struct {|};",
+    ">typedef": "typedef struct {|};",
+    ">union": "union {|};",
+    ">enum": "enum {|};",
+    ">fn": "void (|) {}",
+    ">return": "return |;",
     ">break": "break;",
     ">continue": "continue;",
 }
 
 #python key pair mapping
 py_keyPair = {
-    ">pr": "print()",
-    ">if": "if :",
-    ">for": "for i in range():",
-    ">w": "while :",
-    ">def": "def function_name():",
-    ">class": "class :",
-    ">try": "try: except:",
-    ">with": "with as :",
-    ">import": "import",
-    ">from": "from import",
-    ">lambda": "lambda :",
-    ">return": "return",
+    ">pr": "print(\"|\")",
+    ">if": "if |:",
+    ">for": "for i in range(|):",
+    ">w": "while |:",
+    ">def": "def function_name(|):",
+    ">class": "class |:",
+    ">try": "try: except|:",
+    ">with": "with | as:",
+    ">import": "import \"|\"",
+    ">from": "from \"|\" import",
+    ">lambda": "lambda |:",
+    ">return": "return |;",
     ">pass": "pass",
     ">break": "break",
     ">continue": "continue",
     ">else": "else:",
-    ">elif": "elif :",
+    ">elif": "elif |:",
 }
 
 #cpp key pair mapping
 cpp_keyPair = {
-    ">pr": "cout << ;",
-    ">if": "if(){};",
-    ">for": "for(;;){}",
-    ">w": "while(){};",
-    ">sw": "switch(){};",
-    ">case": "case : break;",
-    ">do": "do{} while();",
-    ">else": "else{};",
-    ">elif": "else if(){};",
-    ">main": "int main(){};",
-    ">inc": "#include < >",
-    ">class": "class {};",
-    ">stru": "struct {} ;",
-    ">try": "try {} catch() {}",
-    ">template": "template<> class {} ;",
-    ">namespace": "namespace {} ;",
-    ">using": "using namespace ;",
-    ">fn": "void () {}",
-    ">return": "return ;",
+    ">pr": "cout << \"|\";",
+    ">if": "if(|){}",
+    ">for": "for(|;;){}",
+    ">w": "while(|){}",
+    ">sw": "switch(|){}",
+    ">case": "case |: break;",
+    ">do": "do{} while(|);",
+    ">else": "else{}",
+    ">elif": "else if(|){}",
+    ">main": "int main(|){}",
+    ">inc": "#include <|>",
+    ">class": "class {|};",
+    ">stru": "struct {|};",
+    ">try": "try {} catch(|) {}",
+    ">template": "template<|> class {};",
+    ">namespace": "namespace {|};",
+    ">using": "using namespace |;",
+    ">fn": "void (|) {}",
+    ">return": "return |;",
     ">break": "break;",
     ">continue": "continue;",
 }
@@ -97,7 +100,6 @@ def setLanguage(lang):
 
 
 #mode of use
-mode = "writing"
 mode = "coding"
 
 def setMode(new_mode):
@@ -114,9 +116,7 @@ def setMode(new_mode):
     print(f"[STEP] Mode switched to: {mode}")
 
     
-#state variable to determine which language is being used
-state = "c" #default state is c
-mode = "writing"
+#autocorrect setting
 autocorrect_enabled = True
 gui_open = False
 
@@ -216,7 +216,7 @@ def expandShortcut(delimiter_key):
                 controller.release(kb.Key.backspace)
 
        
-            controller.type(expansion)
+            typeWithCursor(expansion)
 
             # re-type delimiter properly
             if delimiter_key == kb.Key.space:
@@ -258,7 +258,7 @@ def expandInstantly():
             controller.press(kb.Key.backspace)
             controller.release(kb.Key.backspace)
 
-        controller.type(expansion)
+        typeWithCursor(expansion)
         print(f"Expanded instantly: {typed} -> {expansion}")
 
     finally:
@@ -311,7 +311,8 @@ def onPress(key):
         updateBufferKey(char)
         if bufferKey:
             print("BUFFER:", repr(bufferKey))
-            expandInstantly()
+            if findExactShortcut():
+                expandInstantly()
 
 def findExactShortcut():
     currentKeyPair = getCurrentKeyPair()
@@ -319,15 +320,27 @@ def findExactShortcut():
 
 
 def processCompletedToken(delimiter_key):
-    if mode == "writing":
-        autoCorrectCurrentWord()
-        retypeDelimiter(delimiter_key)
-
-    elif mode == "coding":
+    if mode == "coding":
         if bufferKey.startswith(">"):
             expandShortcut(delimiter_key)
-        else:
-            retypeDelimiter(delimiter_key)
+
+def typeWithCursor(template):
+    marker = "|"
+
+    if marker not in template:
+        controller.type(template)
+        return
+
+    marker_index = template.index(marker)
+    final_text = template.replace(marker, "")
+
+    controller.type(final_text)
+
+    chars_to_move_left = len(final_text) - marker_index
+
+    for _ in range(chars_to_move_left):
+        controller.press(kb.Key.left)
+        controller.release(kb.Key.left)
 
 
 
