@@ -1,7 +1,3 @@
-
----
-
-```md
 # 🚀 STEP — Smart Typing Enhancement Platform
 
 > Type less. Think more. Code faster.
@@ -28,6 +24,7 @@ Unlike editor plugins, STEP works **everywhere on your system**.
 ### 1. Smart Code Snippets
 
 Type short triggers to generate full syntax:
+
 
 ```
 
