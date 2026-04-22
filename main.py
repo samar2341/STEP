@@ -105,7 +105,7 @@ mode = "coding"
 def setMode(new_mode):
     global mode
 
-    valid_modes = {"writing", "coding"}
+    valid_modes = {"writing", "coding", "off"}
 
     if new_mode not in valid_modes:
         print(f"[ERROR] Invalid mode: {new_mode}")
@@ -119,6 +119,10 @@ def setMode(new_mode):
 #autocorrect setting
 autocorrect_enabled = True
 gui_open = False
+pressedKeys = set()
+hotkeyLockAuto = False
+hotkeyLockMode = False
+hotkeyLockCycle = False
 
 #global stating
 bufferKey = "" #buffer to store the keys pressed
@@ -155,16 +159,24 @@ def removeLastCharacter():
 def updateBufferKey(char):
     global bufferKey
 
-    if not bufferKey:
-        if char == ">":
-            bufferKey = ">"
-        return
+    if mode == "coding":
+        if not bufferKey:
+            if char == ">":
+                bufferKey = ">"
+            return
 
-    if char.isalnum() or char in ["_", ">", "."]:
-        bufferKey += char
-    else:
-        clearBufferKey()
+        if char.isalnum() or char in ["_", ">", "."]:
+            bufferKey += char
+        else:
+            clearBufferKey()
 
+    elif mode == "writing":
+        if char.isalpha():
+            bufferKey += char
+        else:
+            clearBufferKey()
+
+            
 def pressBackspace(times):
     global injectingKey
     injectingKey = True
@@ -211,11 +223,14 @@ def expandShortcut(delimiter_key):
 
         try:
         
-            for _ in range(len(bufferKey)):
-                controller.press(kb.Key.backspace)
-                controller.release(kb.Key.backspace)
+            # Select the entire word backward
+            controller.press(kb.Key.ctrl)
+            controller.press(kb.Key.shift)
+            controller.press(kb.Key.left)
+            controller.release(kb.Key.left)
+            controller.release(kb.Key.shift)
+            controller.release(kb.Key.ctrl)
 
-       
             typeWithCursor(expansion)
 
             # re-type delimiter properly
@@ -243,6 +258,26 @@ def toggleStep():
     clearBufferKey()
     print("STEP active:", activeKey)
 
+
+
+def _cycleMode():
+    global mode, autocorrect_enabled
+    if mode == "coding":
+        autocorrect_enabled = True
+        setMode("writing")
+        print("[STEP] ▶ writing mode | Autocorrect ON")
+    elif mode == "writing":
+        mode = "off"
+        autocorrect_enabled = False
+        clearBufferKey()
+        print("[STEP] ▶ OFF")
+    else:  # off
+        autocorrect_enabled = False
+        setMode("coding")
+        print("[STEP] ▶ coding mode | Autocorrect OFF")
+
+
+
 def expandInstantly():
     global injectingKey
 
@@ -254,9 +289,13 @@ def expandInstantly():
 
     injectingKey = True
     try:
-        for _ in range(len(typed)):
-            controller.press(kb.Key.backspace)
-            controller.release(kb.Key.backspace)
+        # Select the entire word backward
+        controller.press(kb.Key.ctrl)
+        controller.press(kb.Key.shift)
+        controller.press(kb.Key.left)
+        controller.release(kb.Key.left)
+        controller.release(kb.Key.shift)
+        controller.release(kb.Key.ctrl)
 
         typeWithCursor(expansion)
         print(f"Expanded instantly: {typed} -> {expansion}")
@@ -266,30 +305,51 @@ def expandInstantly():
         clearBufferKey()
 
 
+def normalizeKey(key):
+    try:
+        return key.char.lower()
+    except AttributeError:
+        return key
+
+
+def onRelease(key):
+    normalized = normalizeKey(key)
+    pressedKeys.discard(normalized)
+
+
 
 #main function onPress key listener
 def onPress(key):
-    global injectingKey, activeKey
+    global injectingKey, activeKey, autocorrect_enabled, hotkeyLockCycle
 
     if injectingKey:
         return
 
-    if key == kb.Key.f8:
-        toggleStep()
-        return
-    if key == kb.Key.f6:
-        setLanguage("c")
-        return
+    normalized = normalizeKey(key)
+    pressedKeys.add(normalized)
 
-    if key == kb.Key.f7:
-        setLanguage("python")
-        return
+    ctrlPressed = (
+        kb.Key.ctrl in pressedKeys or
+        kb.Key.ctrl_l in pressedKeys or
+        kb.Key.ctrl_r in pressedKeys
+    )
 
-    if key == kb.Key.f9:
-        setLanguage("cpp")
-        return
+    altPressed = (
+        kb.Key.alt in pressedKeys or
+        kb.Key.alt_l in pressedKeys or
+        kb.Key.alt_r in pressedKeys
+    )
 
-    if not activeKey:
+    # Ctrl + Alt + F2 → cycle: coding → writing → off → coding
+    if ctrlPressed and altPressed and key == kb.Key.f10                                 :
+        if not hotkeyLockCycle:
+            hotkeyLockCycle = True
+            _cycleMode()
+        return
+    else:
+        hotkeyLockCycle = False
+
+    if not activeKey or mode == "off":
         return
 
     if key == kb.Key.backspace:
@@ -298,8 +358,26 @@ def onPress(key):
         return
 
     if isDelimeter(key):
+        if not bufferKey:
+            return
         print("FINAL TOKEN:", repr(bufferKey))
-        expandShortcut(key)
+
+        if mode == "coding":
+            expandShortcut(key)
+
+        elif mode == "writing" and autocorrect_enabled:
+            autoCorrectCurrentWord()
+
+            if key == kb.Key.space:
+                controller.press(kb.Key.space)
+                controller.release(kb.Key.space)
+            elif key == kb.Key.enter:
+                controller.press(kb.Key.enter)
+                controller.release(kb.Key.enter)
+            elif key == kb.Key.tab:
+                controller.press(kb.Key.tab)
+                controller.release(kb.Key.tab)
+            clearBufferKey()
         return
 
     try:
@@ -311,8 +389,9 @@ def onPress(key):
         updateBufferKey(char)
         if bufferKey:
             print("BUFFER:", repr(bufferKey))
-            if findExactShortcut():
+            if mode == "coding" and findExactShortcut():
                 expandInstantly()
+
 
 def findExactShortcut():
     currentKeyPair = getCurrentKeyPair()
@@ -342,13 +421,65 @@ def typeWithCursor(template):
         controller.press(kb.Key.left)
         controller.release(kb.Key.left)
 
-
-
 #autocorrect function to autocorrect the current word based on the spell checker
 def toggleAutocorrect():
     global autocorrect_enabled
+
     autocorrect_enabled = not autocorrect_enabled
-    print(f"[STEP] Autocorrect: {autocorrect_enabled}")
+
+    if autocorrect_enabled:
+        setMode("writing")
+        clearBufferKey()
+        print("[STEP] Autocorrect ON | Writing mode ON")
+    else:
+        clearBufferKey()
+        print("[STEP] Autocorrect OFF")
+
+
+def autoCorrectCurrentWord():
+    global bufferKey, injectingKey
+
+    if not bufferKey:
+        return
+
+    if len(bufferKey) <= 2:
+        return
+
+    # get all candidates
+    candidates = spell.candidates(bufferKey)
+
+    if not candidates:
+        return
+
+    # pick closest word manually
+    def similarity(a, b):
+        return sum(1 for x, y in zip(a, b) if x == y)
+
+    best_match = max(candidates, key=lambda w: similarity(bufferKey, w))
+
+    # avoid bad corrections
+    if best_match == bufferKey:
+        return
+
+    if abs(len(best_match) - len(bufferKey)) > 1:
+        return
+
+    injectingKey = True
+    try:
+        # Select the entire word backward
+        controller.press(kb.Key.ctrl)
+        controller.press(kb.Key.shift)
+        controller.press(kb.Key.left)
+        controller.release(kb.Key.left)
+        controller.release(kb.Key.shift)
+        controller.release(kb.Key.ctrl)
+
+        controller.type(best_match)
+        print(f"[AUTO] {bufferKey} -> {best_match}")
+
+    finally:
+        injectingKey = False
+
 
 #main function
 def main():
@@ -357,7 +488,7 @@ def main():
     print("Press F8 to toggle ON/OFF")
     print("Try: >pr then space")
 
-    with kb.Listener(on_press = onPress) as listener:
+    with kb.Listener(on_press = onPress, on_release = onRelease) as listener:
         listener.join()
 
 
