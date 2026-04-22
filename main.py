@@ -9,76 +9,71 @@ controller = kb.Controller()
 
 #dictionary of key pair mapping 
 c_keyPair = {
-    "pr": "printf();",
-    "if": "if(){};",
-    "for": "for(;;){}",
-    "w": "while(){};",
-    "sw": "switch(){};",
-    "case": "case : break;",
-    "do": "do{} while();",
-    "else": "else{};",
-    "elif": "else if(){};",
-    "main": "int main(){ };",
-    "inc": "#include < >",
-    "stru": "struct {} ;",
-    "typedef": "typedef struct {} ;",
-    "union": "union {} ;",
-    "enum": "enum {} ;",
-    "fn": "void () {}",
-    "return": "return ;",
-    "break": "break;",
-    "continue": "continue;",
-    "stdio": "#include <stdio.h>",
-    "math": "#include <math.h>",
-    "string": "#include <string.h>",
-    "time": "#include <time.h>",
-
+    ">pr": "printf();",
+    ">if": "if(){};",
+    ">for": "for(;;){}",
+    ">w": "while(){};",
+    ">sw": "switch(){};",
+    ">case": "case : break;",
+    ">do": "do{} while();",
+    ">else": "else{};",
+    ">elif": "else if(){};",
+    ">main": "int main(){};",
+    ">inc": "#include < >",
+    ">stru": "struct {} ;",
+    ">typedef": "typedef struct {} ;",
+    ">union": "union {} ;",
+    ">enum": "enum {} ;",
+    ">fn": "void () {}",
+    ">return": "return ;",
+    ">break": "break;",
+    ">continue": "continue;",
 }
 
 #python key pair mapping
 py_keyPair = {
-    "pr": "print()",
-    "if": "if :",
-    "for": "for i in range():",
-    "w": "while :",
-    "def": "def function_name():",
-    "class": "class :",
-    "try": "try: except:",
-    "with": "with as :",
-    "import": "import",
-    "from": "from import",
-    "lambda": "lambda :",
-    "return": "return",
-    "pass": "pass",
-    "break": "break",
-    "continue": "continue",
-    "else": "else:",
-    "elif": "elif :",
+    ">pr": "print()",
+    ">if": "if :",
+    ">for": "for i in range():",
+    ">w": "while :",
+    ">def": "def function_name():",
+    ">class": "class :",
+    ">try": "try: except:",
+    ">with": "with as :",
+    ">import": "import",
+    ">from": "from import",
+    ">lambda": "lambda :",
+    ">return": "return",
+    ">pass": "pass",
+    ">break": "break",
+    ">continue": "continue",
+    ">else": "else:",
+    ">elif": "elif :",
 }
 
 #cpp key pair mapping
 cpp_keyPair = {
-    "pr": "cout << ;",
-    "if": "if(){};",
-    "for": "for(;;){}",
-    "w": "while(){};",
-    "sw": "switch(){};",
-    "case": "case : break;",
-    "do": "do{} while();",
-    "else": "else{};",
-    "elif": "else if(){};",
-    "main": "int main(){};",
-    "inc": "#include < >",
-    "class": "class {};",
-    "stru": "struct {} ;",
-    "try": "try {} catch() {}",
-    "template": "template<> class {} ;",
-    "namespace": "namespace {} ;",
-    "using": "using namespace ;",
-    "fn": "void () {}",
-    "return": "return ;",
-    "break": "break;",
-    "continue": "continue;",
+    ">pr": "cout << ;",
+    ">if": "if(){};",
+    ">for": "for(;;){}",
+    ">w": "while(){};",
+    ">sw": "switch(){};",
+    ">case": "case : break;",
+    ">do": "do{} while();",
+    ">else": "else{};",
+    ">elif": "else if(){};",
+    ">main": "int main(){};",
+    ">inc": "#include < >",
+    ">class": "class {};",
+    ">stru": "struct {} ;",
+    ">try": "try {} catch() {}",
+    ">template": "template<> class {} ;",
+    ">namespace": "namespace {} ;",
+    ">using": "using namespace ;",
+    ">fn": "void () {}",
+    ">return": "return ;",
+    ">break": "break;",
+    ">continue": "continue;",
 }
 
 
@@ -126,7 +121,6 @@ autocorrect_enabled = True
 gui_open = False
 
 #global stating
-language = "c" #default language
 bufferKey = "" #buffer to store the keys pressed
 activeKey = True #flag to determine if the key pair is active
 injectingKey = False #flag to determine if the key pair is being injected
@@ -161,7 +155,12 @@ def removeLastCharacter():
 def updateBufferKey(char):
     global bufferKey
 
-    if char.isalnum() or char in ["_", "."]:
+    if not bufferKey:
+        if char == ">":
+            bufferKey = ">"
+        return
+
+    if char.isalnum() or char in ["_", ">", "."]:
         bufferKey += char
     else:
         clearBufferKey()
@@ -325,7 +324,10 @@ def processCompletedToken(delimiter_key):
         retypeDelimiter(delimiter_key)
 
     elif mode == "coding":
-        expandShortcut(delimiter_key)
+        if bufferKey.startswith(">"):
+            expandShortcut(delimiter_key)
+        else:
+            retypeDelimiter(delimiter_key)
 
 
 
@@ -340,7 +342,7 @@ def main():
     print("Starting STEP...")
     print("Language:", language)
     print("Press F8 to toggle ON/OFF")
-    print("Try: pr then space")
+    print("Try: >pr then space")
 
     with kb.Listener(on_press = onPress) as listener:
         listener.join()
@@ -348,6 +350,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
