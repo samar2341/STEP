@@ -1,120 +1,263 @@
-# STEP — Smart Typing Enhancement Platform
+```
+# 🚀 STEP — Smart Typing Enhancement Platform
 
-## 🚀 Overview
-
-STEP (Smart Typing Enhancement Platform) is a cross-platform keyboard mediation system designed to improve programming efficiency. It intercepts keyboard input, expands coding shortcuts, corrects common typing mistakes, and adapts based on user behavior.
-
-Instead of typing full syntax repeatedly, users can type short triggers like `>pr` and STEP expands them into full code like `printf("");`.
+> **Type less. Think more. Code faster.**
 
 ---
 
-## 🎯 Objectives
+## 🧠 What is STEP?
 
-* Reduce repetitive typing in programming
-* Increase coding speed and efficiency
-* Minimize typing errors
-* Provide adaptive suggestions based on usage
-* Create a system-level keyboard enhancement tool
+**STEP (Smart Typing Enhancement Platform)** is a **system-wide typing engine** that enhances how you write code and text.
 
----
+It acts as a **real-time layer between your keyboard and operating system**, enabling:
 
-## 🧠 Core Features
+- ⚡ Instant code expansion  
+- 🧠 Intelligent autocorrection  
+- 🌍 Multi-language support  
+- 🎯 Cursor-aware snippets  
 
-### 1. Shortcut Expansion
+Unlike IDE plugins, STEP works **everywhere**:
 
-Users can define shortcuts prefixed with `>`.
-
-Examples:
-
-* `>pr` → `printf("");`
-* `>w` → `while`
-* `>if` → `if () { }`
-
-Expansion is triggered on:
-
-* Space
-* Enter
-* Tab
+- VS Code  
+- Notepad  
+- Browser  
+- Word / Google Docs  
+- Terminal  
 
 ---
 
-### 2. Global Keyboard Mediation
+## ✨ Features
 
-STEP works across applications (VS Code, Notepad, browser inputs) by:
+### ⚡ Smart Snippets
 
-* Listening to global keyboard input
-* Processing input using rules
-* Injecting modified output
+Type short triggers → get full syntax instantly:
 
----
-
-### 3. ON/OFF Toggle
-
-* Toggle using a hotkey (e.g., F8)
-* When OFF → normal keyboard behavior
-* When ON → smart features active
-
----
-
-### 4. Typo Detection & Correction
-
-STEP tracks common mistakes and can auto-correct:
-
-* `retrun` → `return`
-* `pritnf` → `printf`
-
----
-
-### 5. Usage Tracking
-
-STEP monitors:
-
-* Frequently used shortcuts
-* Repeated patterns
-* Backspace-heavy sequences
-
----
-
-### 6. Adaptive Suggestions
-
-Based on usage:
-
-* Suggest shorter shortcuts
-* Recommend corrections
-* Highlight inefficient typing patterns
-
----
-
-## ⚙️ System Architecture
-
-Keyboard → Listener → Buffer → Rule Engine → Injector → Application
-
-### Components:
-
-* **Listener**: Captures keystrokes
-* **Buffer**: Stores recent input
-* **Rule Engine**: Matches shortcuts and errors
-* **Injector**: Outputs modified text
-* **Stats Module**: Tracks usage and mistakes
-
----
-
-## 🛠️ Tech Stack
-
-* Python
-* pynput (keyboard listening & control)
-* tkinter (optional UI)
-* JSON (configuration storage)
-
----
-
-## 📦 Installation
-
-```bash
-pip install pynput
 ```
 
-Run the program:
+> pr  →  printf("");
+> if  →  if () {
+> ...
+> }
+
+````
+
+---
+
+### 🎯 Cursor-Aware Editing
+
+STEP intelligently places your cursor using the `|` marker:
+
+```c
+printf("|");
+````
+
+After expansion:
+
+```c
+printf();
+        ^
+```
+
+---
+
+### 🧠 Intelligent Autocorrect
+
+Corrects common typing mistakes in real-time:
+
+```
+teh      → the
+recieve  → receive
+welcoma  → welcome
+hhell    → hello
+```
+
+✔ Fast
+✔ Context-aware
+✔ Non-intrusive
+
+---
+
+### 🌍 Multi-Language Support
+
+Switch languages instantly:
+
+| Shortcut       | Language |
+| -------------- | -------- |
+| Ctrl + Alt + 1 | C        |
+| Ctrl + Alt + 2 | Python   |
+| Ctrl + Alt + 3 | C++      |
+
+Each language has its own:
+
+* syntax rules
+* snippet system
+* formatting
+
+---
+
+### 🔁 Mode System
+
+STEP works in 3 modes:
+
+| Mode    | Behavior            |
+| ------- | ------------------- |
+| Coding  | Snippets enabled    |
+| Writing | Autocorrect enabled |
+| Off     | STEP disabled       |
+
+Switch mode using:
+
+```
+Ctrl + Alt + F10
+```
+
+---
+
+### ⚙️ System-Wide Engine
+
+Built using:
+
+* `pynput` → global keyboard listener
+* `Controller()` → input injection
+
+STEP:
+
+* captures keystrokes globally
+* processes them in real-time
+* injects corrected or expanded text
+
+---
+
+## 🏗️ How It Works
+
+### 🔹 1. Input Capture
+
+```python
+kb.Listener(on_press=onPress, on_release=onRelease)
+```
+
+Captures all keyboard input system-wide.
+
+---
+
+### 🔹 2. Buffer System
+
+```python
+bufferKey
+```
+
+Stores the current typed word.
+
+---
+
+### 🔹 3. Pattern Detection
+
+STEP checks:
+
+* Is it a snippet? → `>pr`
+* Is it a word? → `teh`
+* Is it a delimiter? → space / enter
+
+---
+
+### 🔹 4. Action Engine
+
+#### Coding Mode
+
+```python
+expandInstantly()
+expandShortcut()
+```
+
+#### Writing Mode
+
+```python
+autoCorrectCurrentWord()
+```
+
+---
+
+### 🔹 5. Smart Replacement
+
+STEP:
+
+1. Deletes original text
+2. Injects new text
+3. Positions cursor
+
+---
+
+## 🧩 Snippet Architecture
+
+Each language uses a dictionary:
+
+```python
+c_keyPair = {
+    ">pr": "printf(\"|\");",
+    ">if": "if (|) {\n    \n}",
+}
+```
+
+---
+
+## 🧠 Autocorrect Engine
+
+Uses:
+
+```python
+SpellChecker()
+```
+
+Enhanced with:
+
+* similarity scoring
+* typo filtering
+* safe replacement logic
+
+---
+
+## 🧪 Example Workflow
+
+### Coding Mode
+
+```
+>main
+```
+
+↓
+
+```c
+#include <stdio.h>
+
+int main() {
+    
+    return 0;
+}
+```
+
+---
+
+### Writing Mode
+
+```
+recieve + space
+```
+
+↓
+
+```
+receive
+```
+
+---
+
+## 🛠️ Installation
+
+```bash
+pip install pynput pyspellchecker
+```
+
+Run:
 
 ```bash
 python main.py
@@ -122,101 +265,66 @@ python main.py
 
 ---
 
-## ▶️ Usage
+## 🧪 Requirements
 
-1. Start STEP
-2. Ensure it is ACTIVE
-3. Type shortcuts using `>` prefix
-4. Press space/enter to expand
-
-Example:
-
-```
->pr ␣ → printf("");
-```
+* Python 3.x
+* Windows / Linux (X11 recommended for Linux)
 
 ---
 
-## 📊 Example Shortcut Config
+## ⚠️ Notes
 
-```json
-{
-  ">pr": "printf(\"\");",
-  ">w": "while",
-  ">if": "if () {\n    \n}"
-}
-```
+* Linux Wayland may block global input
+* Some apps handle synthetic key input differently
+* Run with proper permissions if needed
 
 ---
 
-## ⚠️ Limitations / Flaws
+## 🚀 Future Enhancements
 
-### 1. OS-Level Restrictions
-
-* Some applications block synthetic input
-* macOS may require accessibility permissions
-* Linux may require elevated privileges
-
-### 2. Not Truly Low-Level
-
-* Uses high-level hooks (pynput)
-* Not a full kernel-level mediator
-
-### 3. Potential Input Conflicts
-
-* `>` is a valid programming symbol
-* Must carefully avoid false triggers
-
-### 4. Performance Overhead
-
-* Continuous key listening may use CPU
-* Large rule sets can slow matching
-
-### 5. Limited Context Awareness
-
-* Does not fully understand programming language context
-* Cannot differentiate all scenarios automatically
-
-### 6. Error Detection Simplicity
-
-* Basic typo correction
-* Not full NLP or AI-based system
+* 🔥 Tab navigation (`<1> <2>`)
+* 🧠 Learning-based autocorrect
+* ⚙️ Config file (user-defined snippets)
+* 🖥️ GUI control panel
+* 📦 EXE standalone app
+* 🧩 Plugin system
 
 ---
 
-## ⚠️ Risks & Challenges
+## 💡 Vision
 
-* Key injection may behave inconsistently across OS
-* Debugging keyboard hooks can be difficult
-* Race conditions in fast typing scenarios
-* Buffer synchronization issues
+STEP is more than a tool.
 
----
+It is a step toward:
 
-## 🔮 Future Improvements
+> **A programmable typing layer over your OS**
 
-* AI-based typo correction
-* Language-specific expansion (C, Python, JS)
-* GUI dashboard with analytics
-* Custom user-defined mappings
-* Plugin system
-* Integration with IDEs
-* Performance optimization with lower-level APIs
+A system that:
 
----
-
-## 🏁 Conclusion
-
-STEP is a powerful prototype that demonstrates how keyboard input can be enhanced intelligently to improve programming efficiency. While the current implementation focuses on rule-based expansion and basic adaptation, it lays the foundation for a more advanced, intelligent typing system.
+* understands your typing
+* improves your speed
+* adapts to your workflow
 
 ---
 
 ## 👨‍💻 Author
 
-Samar 
+Built with ⚡ by Samar
 
 ---
 
-## 📜 License
+## ⭐ Support
 
-This project is for educational purposes.
+If you like STEP:
+
+* Star ⭐ the repo
+* Share 🚀
+* Improve 🔧
+
+
+---
+
+If you want next upgrade:
+
+👉 I can make this **insane GitHub profile style (badges + animations + neon theme)** 🚀
+```
