@@ -1,229 +1,91 @@
 
 ```
-# 🚀 STEP — Smart Typing Enhancement Platform
+# STEP — Smart Typing Enhancement Platform
 
-> **Type less. Think more. Code faster.**
+A system-wide typing engine for faster coding. Type shortcuts, get full snippets. Works everywhere — VS Code, terminal, browser, text editors.
 
----
+## What it does
 
-## 🧠 What is STEP?
-
-**STEP (Smart Typing Enhancement Platform)** is a **system-wide typing engine** that enhances how you write code and text.
-
-It acts as a **real-time layer between your keyboard and operating system**, enabling:
-
-- ⚡ Instant code expansion  
-- 🧠 Intelligent autocorrection  
-- 🌍 Multi-language support  
-- 🎯 Cursor-aware snippets  
-
-Unlike IDE plugins, STEP works **everywhere**:
-
-- VS Code  
-- Notepad  
-- Browser  
-- Word / Google Docs  
-- Terminal  
+- Type `>pr` → get `printf("");`
+- Autocorrect typos as you type
+- Works globally (not just in your IDE)
+- Support for C, Python, C++, and more
 
 ---
 
-## ✨ Features
+## Features
 
-### ⚡ Smart Snippets
+### Smart Snippets
 
-Type short triggers → get full syntax instantly:
+Short triggers expand to full code:
 
 ```
-> pr  →  printf("");
-> if  →  if () {
-> ...
-> }
+>pr   →  printf("");
+>if   →  if () {
+           }
+>main →  int main() {
+             return 0;
+         }
 ```
 
----
+### Autocorrect
 
-### 🎯 Cursor-Aware Editing
-
-STEP intelligently places your cursor using the `|` marker:
-
-```c
-printf("|");
-```
-
-After expansion:
-
-```c
-printf();
-        ^
-```
-
----
-
-### 🧠 Intelligent Autocorrect
-
-Corrects common typing mistakes in real-time:
+Real-time typo fixing:
 
 ```
 teh      → the
 recieve  → receive
-welcoma  → welcome
 hhell    → hello
 ```
 
-✔ Fast
-✔ Context-aware
-✔ Non-intrusive
+### Multi-Language
+
+Switch between C, Python, C++ with keyboard shortcuts.
+
+### Mode System
+
+- **Coding Mode**: Snippets on
+- **Writing Mode**: Autocorrect on  
+- **Off**: Disabled
 
 ---
 
-### 🌍 Multi-Language Support
+## How It Works
 
-Switch languages instantly:
+1. **Listens** to all keyboard input globally
+2. **Buffers** the current word being typed
+3. **Detects** if it's a snippet trigger or misspelling
+4. **Replaces** the text with the expansion or correction
+5. **Positions** cursor in the right place
 
-| Shortcut       | Language |
-| -------------- | -------- |
-| Ctrl + Alt + 1 | C        |
-| Ctrl + Alt + 2 | Python   |
-| Ctrl + Alt + 3 | C++      |
-
-Each language has its own:
-
-* syntax rules
-* snippet system
-* formatting
+Uses `pynput` for keyboard listening and text injection.
 
 ---
 
-### 🔁 Mode System
+## Snippet Architecture
 
-STEP works in 3 modes:
-
-| Mode    | Behavior            |
-| ------- | ------------------- |
-| Coding  | Snippets enabled    |
-| Writing | Autocorrect enabled |
-| Off     | STEP disabled       |
-
-Switch mode using:
-
-```
-Ctrl + Alt + F10
-```
-
----
-
-### ⚙️ System-Wide Engine
-
-Built using:
-
-* `pynput` → global keyboard listener
-* `Controller()` → input injection
-
-STEP:
-
-* captures keystrokes globally
-* processes them in real-time
-* injects corrected or expanded text
-
----
-
-## 🏗️ How It Works
-
-### 🔹 1. Input Capture
-
-```python
-kb.Listener(on_press=onPress, on_release=onRelease)
-```
-
-Captures all keyboard input system-wide.
-
----
-
-### 🔹 2. Buffer System
-
-```python
-bufferKey
-```
-
-Stores the current typed word.
-
----
-
-### 🔹 3. Pattern Detection
-
-STEP checks:
-
-* Is it a snippet? → `>pr`
-* Is it a word? → `teh`
-* Is it a delimiter? → space / enter
-
----
-
-### 🔹 4. Action Engine
-
-#### Coding Mode
-
-```python
-expandInstantly()
-expandShortcut()
-```
-
-#### Writing Mode
-
-```python
-autoCorrectCurrentWord()
-```
-
----
-
-### 🔹 5. Smart Replacement
-
-STEP:
-
-1. Deletes original text
-2. Injects new text
-3. Positions cursor
-
----
-
-## 🧩 Snippet Architecture
-
-Each language uses a dictionary:
+Each language has a dictionary of triggers:
 
 ```python
 c_keyPair = {
-    ">pr": "printf(\"|\");",
+    ">pr": "printf(\"|\")",
     ">if": "if (|) {\n    \n}",
 }
 ```
 
----
-
-## 🧠 Autocorrect Engine
-
-Uses:
-
-```python
-SpellChecker()
-```
-
-Enhanced with:
-
-* similarity scoring
-* typo filtering
-* safe replacement logic
+The `|` marks where the cursor goes after expansion.
 
 ---
 
-## 🧪 Example Workflow
+## Autocorrect Engine
 
-### Coding Mode
+Uses `SpellChecker()` with similarity scoring to catch typos safely. Only corrects common mistakes.
 
-```
->main
-```
+---
 
-↓
+## Example Workflow
+
+Type `>main` in Coding Mode:
 
 ```c
 #include <stdio.h>
@@ -234,96 +96,43 @@ int main() {
 }
 ```
 
----
-
-### Writing Mode
-
-```
-recieve + space
-```
-
-↓
-
-```
-receive
-```
+Type `recieve` in Writing Mode → autocorrects to `receive`
 
 ---
 
-## 🛠️ Installation
+## Installation
 
 ```bash
 pip install pynput pyspellchecker
-```
-
-Run:
-
-```bash
 python main.py
 ```
 
 ---
 
-## 🧪 Requirements
+## Requirements
 
-* Python 3.x
-* Windows / Linux (X11 recommended for Linux)
-
----
-
-## ⚠️ Notes
-
-* Linux Wayland may block global input
-* Some apps handle synthetic key input differently
-* Run with proper permissions if needed
+- Python 3.x
+- Windows / Linux (X11)
 
 ---
 
-## 🚀 Future Enhancements
+## Notes
 
-* 🔥 Tab navigation (`<1> <2>`)
-* 🧠 Learning-based autocorrect
-* ⚙️ Config file (user-defined snippets)
-* 🖥️ GUI control panel
-* 📦 EXE standalone app
-* 🧩 Plugin system
+- Wayland may not work on Linux
+- Some apps handle synthetic input differently
 
 ---
 
-## 💡 Vision
+## Future Ideas
 
-STEP is more than a tool.
-
-It is a step toward:
-
-> **A programmable typing layer over your OS**
-
-A system that:
-
-* understands your typing
-* improves your speed
-* adapts to your workflow
+- Tab navigation for cursor stops
+- Config file for custom snippets
+- GUI control panel
+- Standalone EXE
 
 ---
 
-## 👨‍💻 Author
+## Author
 
-Built with ⚡ by Samar
-
----
-
-## ⭐ Support
-
-If you like STEP:
-
-* Star ⭐ the repo
-* Share 🚀
-* Improve 🔧
-
-
----
-
-If you want next upgrade:
-
-👉 I can make this **insane GitHub profile style (badges + animations + neon theme)** 🚀
+Built by Samar
 ```
