@@ -1,3 +1,4 @@
+
 ```
 # 🚀 STEP — Smart Typing Enhancement Platform
 
@@ -33,13 +34,11 @@ Unlike IDE plugins, STEP works **everywhere**:
 Type short triggers → get full syntax instantly:
 
 ```
-
 > pr  →  printf("");
 > if  →  if () {
 > ...
 > }
-
-````
+```
 
 ---
 
@@ -49,7 +48,7 @@ STEP intelligently places your cursor using the `|` marker:
 
 ```c
 printf("|");
-````
+```
 
 After expansion:
 
