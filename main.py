@@ -12,40 +12,78 @@ language = "c" #default language
 
 #dictionary of key pair mapping 
 c_keyPair = {
-    ">pr": "printf(\"|\");",
-    ">if": "if (|) {\n\n}",
+    ">pr": 'printf("|");',
+    ">if": "if (|) {\n    \n}",
     ">for": "for (int i = 0; i < |; i++) {\n    \n}",
-    ">w": "while (|) {\n\n}",
-    ">sw": "switch (|) {\ncase : break;\ndefault: break;\n}",
-    ">case": "case |:\nbreak;",
-    ">do": "do {\n\n} while (|);",
-    ">else": "else {\n\n}",
-    ">elif": "else if (|) {\n\n}",
-    ">main": "#include <stdio.h>\nint main() {\n    \n    return 0;\n}",
-    ">inc": "#include <>",
+    ">w": "while (|) {\n    \n}",
+    ">sw": (
+        "switch (|) {\n"
+        "    case :\n"
+        "        break;\n"
+        "    default:\n"
+        "        break;\n"
+        "}"
+    ),
+    ">case": "case |:\n    break;",
+    ">do": "do {\n    \n} while (|);",
+    ">else": "else {\n    \n}",
+    ">elif": "else if (|) {\n    \n}",
+    ">main": (
+        "#include <stdio.h>\n\n"
+        "int main() {\n"
+        "    \n"
+        "    return 0;\n"
+        "}"
+    ),
+    ">inc": "#include <|>",
     ">stdio": "#include <stdio.h>",
     ">stdlib": "#include <stdlib.h>",
     ">string": "#include <string.h>",
     ">math": "#include <math.h>",
-    ">stru": "struct |{\n    \n};",
-    ">typedef": "typedef struct |{\n    \n} name;",
-    ">union": "union |{\n    \n};",
-    ">enum": "enum {\n    \n};",
+    ">stru": (
+        "struct | {\n"
+        "    \n"
+        "};"
+    ),
+    ">typedef": (
+        "typedef struct {\n"
+        "    \n"
+        "} |;"
+    ),
+    ">union": (
+        "union | {\n"
+        "    \n"
+        "};"
+    ),
+    ">enum": (
+        "enum | {\n"
+        "    \n"
+        "};"
+    ),
     ">fn": "void |() {\n    \n}",
     ">return": "return |;",
     ">break": "break;",
     ">continue": "continue;",
 }
 
-#python key pair mapping
+
 py_keyPair = {
     ">pr": "print(|)",
     ">if": "if |:\n    ",
     ">for": "for i in range(|):\n    ",
     ">w": "while |:\n    ",
     ">def": "def |():\n    ",
-    ">class": "class |:\n    def __init__(self):\n        ",
-    ">try": "try:\n    \nexcept Exception as e:\n    ",
+    ">class": (
+        "class |:\n"
+        "    def __init__(self):\n"
+        "        "
+    ),
+    ">try": (
+        "try:\n"
+        "    \n"
+        "except Exception as e:\n"
+        "    "
+    ),
     ">with": "with | as var:\n    ",
     ">import": "import |",
     ">from": "from | import ",
@@ -58,27 +96,67 @@ py_keyPair = {
     ">elif": "elif |:\n    ",
 }
 
+
 cpp_keyPair = {
-    ">pr": "cout << \"|\";",
+    ">pr": 'cout << "|" << endl;',
     ">if": "if (|) {\n    \n}",
     ">for": "for (int i = 0; i < |; i++) {\n    \n}",
     ">w": "while (|) {\n    \n}",
-    ">sw": "switch (|) {\n    case : break;\n    default: break;\n}",
+    ">sw": (
+        "switch (|) {\n"
+        "    case :\n"
+        "        break;\n"
+        "    default:\n"
+        "        break;\n"
+        "}"
+    ),
     ">case": "case |:\n    break;",
     ">do": "do {\n    \n} while (|);",
     ">else": "else {\n    \n}",
     ">elif": "else if (|) {\n    \n}",
-    ">main": "#include <iostream>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}",
-    ">inc": "#include <>",
+    ">main": (
+        "#include <iostream>\n"
+        "using namespace std;\n\n"
+        "int main() {\n"
+        "    \n"
+        "    return 0;\n"
+        "}"
+    ),
+    ">inc": "#include <|>",
     ">iostream": "#include <iostream>",
     ">vector": "#include <vector>",
     ">string": "#include <string>",
     ">algorithm": "#include <algorithm>",
-    ">class": "class | {\npublic:\n    \n};",
-    ">stru": "struct |{\n    \n};",
-    ">try": "try {\n    \n} catch (exception &e) {\n    \n}",
-    ">template": "template <typename T>\nclass | {\n    \n};",
-    ">namespace": "namespace | {\n    \n}",
+    ">class": (
+        "class | {\n"
+        "public:\n"
+        "    \n"
+        "};"
+    ),
+    ">stru": (
+        "struct | {\n"
+        "    \n"
+        "};"
+    ),
+    ">try": (
+        "try {\n"
+        "    \n"
+        "} catch (const exception& e) {\n"
+        "    \n"
+        "}"
+    ),
+    ">template": (
+        "template <typename T>\n"
+        "class | {\n"
+        "public:\n"
+        "    \n"
+        "};"
+    ),
+    ">namespace": (
+        "namespace | {\n"
+        "    \n"
+        "}"
+    ),
     ">using": "using namespace |;",
     ">fn": "void |() {\n    \n}",
     ">return": "return |;",
@@ -469,7 +547,7 @@ def main():
     print(f"Mode        : {mode}")
     print(f"Autocorrect : {'ON' if autocorrect_enabled else 'OFF'}")
     print("Shortcuts:")
-    print("Ctrl + Alt + F10 : Cycle mode")
+    print("Ctrl + Alt + . : Cycle mode")
     print("\nExample:")
     print("  Coding mode -> type >pr")
     print("  Writing mode -> type a word and press space")
