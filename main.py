@@ -263,18 +263,14 @@ def updateBufferKey(char):
 
             
 def pressBackspace(times):
-    global injectingKey
-    injectingKey = True
-
     try:
         for _ in range(times):
             controller.press(kb.Key.backspace)
             controller.release(kb.Key.backspace)
-        time.sleep(0.05)
+            time.sleep(0.01)
     except Exception as e:
         print(f"Error pressing backspace: {e}")
-    finally:
-        injectingKey = False
+
 
 def typeText(text):
     global injectingKey
@@ -282,7 +278,7 @@ def typeText(text):
 
     try:
         controller.type(text)
-        time.sleep(0.05)
+        time.sleep(0.01)
     except Exception as e:
         print(f"Error typing text: {e}")
     finally:
@@ -427,22 +423,10 @@ def onPress(key):
         if not bufferKey:
             return
         print("FINAL TOKEN:", repr(bufferKey))
-
         if mode == "coding":
             expandShortcut(key)
-
         elif mode == "writing" and autocorrect_enabled:
             autoCorrectCurrentWord()
-
-            if key == kb.Key.space:
-                controller.press(kb.Key.space)
-                controller.release(kb.Key.space)
-            elif key == kb.Key.enter:
-                controller.press(kb.Key.enter)
-                controller.release(kb.Key.enter)
-            elif key == kb.Key.tab:
-                controller.press(kb.Key.tab)
-                controller.release(kb.Key.tab)
             clearBufferKey()
         return
 
@@ -518,24 +502,25 @@ def autoCorrectCurrentWord():
 
     def similarity(a, b):
         return sum(1 for x, y in zip(a, b) if x == y)
-    def score(w):
-        length_penalty = abs(len(w) - len(bufferKey))
-        match_score = sum(1 for a, b in zip(w, bufferKey) if a == b)
-        return match_score - length_penalty
 
     best_match = max(candidates, key=lambda w: similarity(bufferKey, w))
+
     if best_match == bufferKey:
         return
 
     if abs(len(best_match) - len(bufferKey)) > 1:
         return
 
+    original = bufferKey
+    clearBufferKey()
+
     injectingKey = True
     try:
-        pressBackspace(len(bufferKey))
+        time.sleep(0.02)
+        pressBackspace(len(original))
+        time.sleep(0.01)
         controller.type(best_match)
-        print(f"[AUTO] {bufferKey} -> {best_match}")
-
+        print(f"[AUTO] {original} -> {best_match}")
     finally:
         injectingKey = False
 
