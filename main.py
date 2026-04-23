@@ -216,31 +216,23 @@ def expandShortcut(delimiter_key):
     global injectingKey
 
     currentKeyPair = getCurrentKeyPair()
-
     expansion = findExactShortcut()
 
     if not expansion:
         clearBufferKey()
         return
 
-    if bufferKey in currentKeyPair:
-        expansion = currentKeyPair[bufferKey]
+    typed = bufferKey
+    clearBufferKey()
 
+    if typed in currentKeyPair:
+        expansion = currentKeyPair[typed]
         injectingKey = True
 
         try:
-        
-            # Select the entire word backward
-            controller.press(kb.Key.ctrl)
-            controller.press(kb.Key.shift)
-            controller.press(kb.Key.left)
-            controller.release(kb.Key.left)
-            controller.release(kb.Key.shift)
-            controller.release(kb.Key.ctrl)
-
+            pressBackspace(len(typed))
             typeWithCursor(expansion)
 
-            # re-type delimiter properly
             if delimiter_key == kb.Key.space:
                 controller.press(kb.Key.space)
                 controller.release(kb.Key.space)
@@ -251,12 +243,9 @@ def expandShortcut(delimiter_key):
                 controller.press(kb.Key.tab)
                 controller.release(kb.Key.tab)
 
-            print(f"Expanded: {bufferKey} -> {expansion}")
-
+            print(f"Expanded: {typed} -> {expansion}")
         finally:
-            injectingKey = False 
-
-    clearBufferKey()
+            injectingKey = False
 
 
 def toggleStep():
@@ -293,23 +282,15 @@ def expandInstantly():
         return
 
     typed = bufferKey
+    clearBufferKey()
 
     injectingKey = True
     try:
-        # Select the entire word backward
-        controller.press(kb.Key.ctrl)
-        controller.press(kb.Key.shift)
-        controller.press(kb.Key.left)
-        controller.release(kb.Key.left)
-        controller.release(kb.Key.shift)
-        controller.release(kb.Key.ctrl)
-
+        pressBackspace(len(typed))
         typeWithCursor(expansion)
         print(f"Expanded instantly: {typed} -> {expansion}")
-
     finally:
         injectingKey = False
-        clearBufferKey()
 
 
 def normalizeKey(key):
@@ -348,7 +329,7 @@ def onPress(key):
     )
 
     # Ctrl + Alt + F2 → cycle: coding → writing → off → coding
-    if ctrlPressed and altPressed and key == kb.Key.f10                                 :
+    if ctrlPressed and altPressed and normalized == '.':
         if not hotkeyLockCycle:
             hotkeyLockCycle = True
             _cycleMode()
@@ -473,14 +454,7 @@ def autoCorrectCurrentWord():
 
     injectingKey = True
     try:
-
-        controller.press(kb.Key.ctrl)
-        controller.press(kb.Key.shift)
-        controller.press(kb.Key.left)
-        controller.release(kb.Key.left)
-        controller.release(kb.Key.shift)
-        controller.release(kb.Key.ctrl)
-
+        pressBackspace(len(bufferKey))
         controller.type(best_match)
         print(f"[AUTO] {bufferKey} -> {best_match}")
 
