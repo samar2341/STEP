@@ -103,7 +103,7 @@ STEP operates in three modes:
 Switch modes using:
 
 ```
-Ctrl + Alt + F10
+Ctrl + Alt + .
 ```
 
 ---
