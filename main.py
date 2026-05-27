@@ -1,14 +1,25 @@
-from pynput import keyboard as kb
+# Windows compatibility: ensure pynput works and add fallback for menu bar
+import sys
 import time
 from spellchecker import SpellChecker
+from pynput import keyboard as kb
+try:
+    import ctypes
+    import threading
+except ImportError:
+    ctypes = None
+    threading = None
 
-spell = SpellChecker(distance=1)
+
+# Aggressive autocorrect: distance=2 for more tolerance
+spell = SpellChecker(distance=2)
 
 #controller for simulating key presses
 controller = kb.Controller()
 
-#state variable to determine which language is being used
-language = "c" #default language
+
+# State variable to determine which language is being used
+language = "c"  # default language
 
 #dictionary of key pair mapping 
 c_keyPair = {
@@ -172,33 +183,40 @@ languageMapping = {
     "cpp": cpp_keyPair,
 }
 
+
+# Update menu bar (Windows only, fallback to print)
+def updateMenuBar():
+    title = f"STEP | Language: {language.upper()} | Mode: {mode} | Autocorrect: {'ON' if autocorrect_enabled else 'OFF'}"
+    if sys.platform.startswith("win") and ctypes:
+        ctypes.windll.kernel32.SetConsoleTitleW(title)
+    else:
+        print(f"[MENU] {title}")
+
 def setLanguage(lang):
     global language
-
     if lang not in languageMapping:
         print(f"[ERROR] Unknown language: {lang}")
         return
-
     language = lang
     clearBufferKey()
     print(f"[STEP] Language switched to: {language}")
+    updateMenuBar()
 
 
 #mode of use
 mode = "coding"
 
+
 def setMode(new_mode):
     global mode
-
     valid_modes = {"writing", "coding", "off"}
-
     if new_mode not in valid_modes:
         print(f"[ERROR] Invalid mode: {new_mode}")
         return
-
     mode = new_mode
     clearBufferKey()
     print(f"[STEP] Mode switched to: {mode}")
+    updateMenuBar()
 
     
 #autocorrect setting
@@ -330,6 +348,7 @@ def toggleStep():
 
 
 
+
 def _cycleMode():
     global mode, autocorrect_enabled
     if mode == "coding":
@@ -345,6 +364,7 @@ def _cycleMode():
         autocorrect_enabled = False
         setMode("coding")
         print("[STEP] ▶ coding mode | Autocorrect OFF")
+    updateMenuBar()
 
 
 
@@ -368,19 +388,28 @@ def expandInstantly():
 
 
 def normalizeKey(key):
-    try:
+    # For '.' key, check vk (virtual key code) for reliability
+    if hasattr(key, 'char') and key.char:
         return key.char.lower()
-    except AttributeError:
-        return key
+    elif hasattr(key, 'vk') and key.vk == 190:
+        return '.'
+    return key
+
 
 
 def onRelease(key):
     normalized = normalizeKey(key)
     pressedKeys.discard(normalized)
+    global hotkeyLockCycle
+    # Reset hotkey lock if Ctrl or Alt or . is released
+    if normalized in [kb.Key.ctrl, kb.Key.ctrl_l, kb.Key.ctrl_r, kb.Key.alt, kb.Key.alt_l, kb.Key.alt_r, 'ctrl', 'ctrl_l', 'ctrl_r', 'alt', 'alt_l', 'alt_r', '.']:
+        hotkeyLockCycle = False
 
 
 
 #main function onPress key listener
+
+# Language switching hotkeys: 1 (C), 2 (Python), 3 (C++)
 def onPress(key):
     global injectingKey, activeKey, autocorrect_enabled, hotkeyLockCycle
 
@@ -390,19 +419,11 @@ def onPress(key):
     normalized = normalizeKey(key)
     pressedKeys.add(normalized)
 
-    ctrlPressed = (
-        kb.Key.ctrl in pressedKeys or
-        kb.Key.ctrl_l in pressedKeys or
-        kb.Key.ctrl_r in pressedKeys
-    )
+    # Robust modifier detection
+    ctrlPressed = any(k in pressedKeys for k in [kb.Key.ctrl, kb.Key.ctrl_l, kb.Key.ctrl_r, 'ctrl', 'ctrl_l', 'ctrl_r'])
+    altPressed = any(k in pressedKeys for k in [kb.Key.alt, kb.Key.alt_l, kb.Key.alt_r, 'alt', 'alt_l', 'alt_r'])
 
-    altPressed = (
-        kb.Key.alt in pressedKeys or
-        kb.Key.alt_l in pressedKeys or
-        kb.Key.alt_r in pressedKeys
-    )
-
-    # Ctrl + Alt + F2 → cycle: coding → writing → off → coding
+    # Ctrl + Alt + . → cycle: coding → writing → off → coding
     if ctrlPressed and altPressed and normalized == '.':
         if not hotkeyLockCycle:
             hotkeyLockCycle = True
@@ -410,6 +431,17 @@ def onPress(key):
         return
     else:
         hotkeyLockCycle = False
+
+    # Language switching: 1 (C), 2 (C++), 3 (Python)
+    if normalized == '1':
+        setLanguage('c')
+        return
+    elif normalized == '2':
+        setLanguage('cpp')
+        return
+    elif normalized == '3':
+        setLanguage('python')
+        return
 
     if not activeKey or mode == "off":
         return
@@ -486,29 +518,35 @@ def toggleAutocorrect():
         print("[STEP] Autocorrect OFF")
 
 
+
+# Aggressive autocorrect: always correct, no mercy, never repeat first word
 def autoCorrectCurrentWord():
     global bufferKey, injectingKey
 
     if not bufferKey:
         return
 
-    if len(bufferKey) <= 2:
+    if len(bufferKey) <= 1:
         return
 
     candidates = spell.candidates(bufferKey)
-
     if not candidates:
         return
 
+    # Always pick the best match, even if very different
     def similarity(a, b):
-        return sum(1 for x, y in zip(a, b) if x == y)
+        # Use Levenshtein distance for better accuracy
+        import difflib
+        return difflib.SequenceMatcher(None, a, b).ratio()
 
     best_match = max(candidates, key=lambda w: similarity(bufferKey, w))
 
-    if best_match == bufferKey:
-        return
+    # If the best match is the same as the buffer, but the buffer is not a valid word, force correction
+    if best_match == bufferKey and bufferKey not in spell:
+        best_match = spell.correction(bufferKey)
 
-    if abs(len(best_match) - len(bufferKey)) > 1:
+    # Fix: never repeat the first word
+    if best_match == bufferKey:
         return
 
     original = bufferKey
@@ -516,7 +554,7 @@ def autoCorrectCurrentWord():
 
     injectingKey = True
     try:
-        time.sleep(0.02)
+        time.sleep(0.01)
         pressBackspace(len(original))
         time.sleep(0.01)
         controller.type(best_match)
@@ -526,17 +564,20 @@ def autoCorrectCurrentWord():
 
 
 #main function
+
 def main():
     print("\n===== STEP =====")
     print(f"Language    : {language}")
     print(f"Mode        : {mode}")
     print(f"Autocorrect : {'ON' if autocorrect_enabled else 'OFF'}")
     print("Shortcuts:")
-    print("Ctrl + Alt + . : Cycle mode")
+    print("Ctrl + Alt + . : Cycle mode (make sure to use the period key)")
+    print("1: C | 2: C++ | 3: Python (switch language)")
     print("\nExample:")
     print("  Coding mode -> type >pr")
     print("  Writing mode -> type a word and press space")
     print("================\n")
+    updateMenuBar()
 
     with kb.Listener(on_press=onPress, on_release=onRelease) as listener:
         listener.join()
